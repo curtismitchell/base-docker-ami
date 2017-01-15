@@ -1,0 +1,44 @@
+{
+  "variables": {
+    "aws_ubuntu_ami": "ami-e13739f6",
+    "new_ami_name": "base-docker-host {{timestamp}}",
+    "ssh_username": "ubuntu",
+    "vpc_id": "{{env `AWS_VPC_ID`}}",
+    "subnet_id": "{{env `AWS_SUBNET_ID`}}"
+  },
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "name": "aws-ubuntu-image",
+    "region": "us-east-1",
+    "source_ami": "{{user `aws_ubuntu_ami`}}",
+    "ami_name": "{{user `new_ami_name`}}",
+    "instance_type": "t2.small",
+    "ssh_username": "{{user `ssh_username`}}",
+    "vpc_id": "{{user `vpc_id`}}",
+    "subnet_id": "{{user `subnet_id`}}",
+    "tags": {
+      "OS_Version": "Ubuntu 16.04",
+      "Name": "Base Docker Image (EFS)"
+    }
+  }],
+
+  "provisioners": [{
+    "type": "shell",
+    "script": "upgrade-kernel.sh"
+    },
+    {
+    "type": "shell",
+    "script": "install-aws-cli.sh"
+    },
+    {
+    "type": "shell",
+    "script": "install-docker.sh"
+    },
+    {
+    "type": "shell",
+    "script": "add-efs-mount.sh"
+  }]
+}
